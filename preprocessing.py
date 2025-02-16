@@ -1,7 +1,8 @@
-from fastai.vision.all import TensorCategory
 import torch
+from fastai.vision.all import TensorCategory
 import numpy as np
 from PIL import Image, ImageOps
+from torchvision.transforms import ToTensor, Resize
 from torchvision.transforms import functional as TF
 import cv2
 
@@ -39,18 +40,19 @@ def threshold_gradients(grad_x, grad_y, threshold=8) -> tuple:
 
 
 @ignore_category
-def conditioning_transform(image_tensor: torch.Tensor, encode_preproces) -> torch.Tensor:
+def conditioning_transform(frame: torch.Tensor,*, encode_preprocess) -> torch.Tensor:
     """
     Applies all transformatiqons to generate the 7-channel input.
     
     Args:
-        image_tensor (torch.Tensor): A tensor image of shape (C, H, W) in range [0, 1].
+        frame (torch.Tensor): A tensor image of shape (C, H, W) in range [0, 1].
     
     Returns:
         torch.Tensor: A 7-channel tensor of shape (7, H, W) in range [0, 1].
     """
     # Convert tensor to PIL image for processing
-    image = TF.to_pil_image(image_tensor)
+    gt_frame, frame = torch.split(frame, 3, dim=0)
+    image = TF.to_pil_image(frame)
 
     # 1-3: Quantized Image
     num_colors = 2 ** np.random.randint(2, 8)
@@ -75,7 +77,7 @@ def conditioning_transform(image_tensor: torch.Tensor, encode_preproces) -> torc
     # Stack all channels into a 7-channel tensor
     stacked_tensor = torch.cat([quantized_tensor, quant_level_channel, grad_x_tensor, grad_y_tensor, texture_indicator], dim=0)
 
-    return stacked_tensor.half()
+    return torch.cat([gt_frame.half(), stacked_tensor.half()])
 
 
 @ignore_category
@@ -84,8 +86,10 @@ def clip_preprocess(frame,*, stage_2):
     clip_processor = stage_2.feature_extractor
     gt_frame = torch.tensor(clip_processor(frame)["pixel_values"][0])
 
-    # cat frame for the encoder
-    return torch.cat([gt_frame, frame], dim=1)  # Shape: (batch_size, 6, H, W)
+    # frame for the encoder
+    frame = ToTensor()(frame)
+    frame = Resize((224,224))(frame.permute(1,2,0))
+    return torch.cat([gt_frame, frame], dim=0)  # Shape: (6, H, W)
 
 
     
