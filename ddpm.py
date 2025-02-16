@@ -1,6 +1,7 @@
-from fastai.vision.all import Callback
 import torch
 import torch.nn as nn
+from fastai.vision.all import Callback
+
 
 class DDPMCB(Callback):
     """Custom FastAI callback for training a UNet diffusion model with DeepFloyd's DDPM Scheduler."""
@@ -14,8 +15,8 @@ class DDPMCB(Callback):
         """Add noise to the input images before passing them to the model."""
         # Get the real images from the batch
         images = self.xb[0]  # Shape: (batch_size, 3, H, W)
-        gt_imgs = images[:,:3,...]
-        encoder_imgs = images[:,3:,...]
+        gt_imgs = images[:, :3, ...]
+        encoder_imgs = images[:, 3:, ...]
         batch_size = images.shape[0]
 
         # Generate noise
@@ -25,9 +26,13 @@ class DDPMCB(Callback):
         # Apply noise
         noisy_images = self.scheduler.add_noise(gt_imgs, noise, t)
 
-        noisy_images = torch.cat([noisy_images, noisy_images], dim=1)  # Shape: (batch_size, 6, H, W)
-        gt_image_true = torch.cat([gt_imgs, gt_imgs], dim=1)  # Shape: (batch_size, 6, H, W)
- 
+        noisy_images = torch.cat(
+            [noisy_images, noisy_images], dim=1
+        )  # Shape: (batch_size, 6, H, W)
+        gt_image_true = torch.cat(
+            [gt_imgs, gt_imgs], dim=1
+        )  # Shape: (batch_size, 6, H, W)
+
         self.learn.xb = (noisy_images, encoder_imgs, t)
         self.learn.yb = (gt_image_true,)
 
@@ -35,7 +40,7 @@ class DDPMCB(Callback):
         """Compute loss: Train UNet to predict noise (MSE loss)."""
         gt_image_pred = self.pred.to(torch.float32)  # Model's prediction
         gt_image_true = self.yb[0]  # Ground truth (now 6-channel)
-        
+
         self.learn.loss = nn.functional.mse_loss(gt_image_pred, gt_image_true)
 
     # def after_batch(self):
