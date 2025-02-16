@@ -12,16 +12,13 @@ def clean_ipython_hist():
     hm.input_hist_raw[:] = [''] * pc
     hm._i = hm._ii = hm._iii = hm._i00 =  ''
 
-# %% ../nbs/11_initializing.ipynb 12
 def clean_tb():
-    # h/t Piotr Czapla
     if hasattr(sys, 'last_traceback'):
         traceback.clear_frames(sys.last_traceback)
         delattr(sys, 'last_traceback')
     if hasattr(sys, 'last_type'): delattr(sys, 'last_type')
     if hasattr(sys, 'last_value'): delattr(sys, 'last_value')
 
-# %% ../nbs/11_initializing.ipynb 13
 def clean_mem():
     clean_tb()
     clean_ipython_hist()
