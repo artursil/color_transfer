@@ -51,7 +51,7 @@ def conditioning_transform(frame: torch.Tensor,*, encode_preprocess) -> torch.Te
         torch.Tensor: A 7-channel tensor of shape (7, H, W) in range [0, 1].
     """
     # Convert tensor to PIL image for processing
-    gt_frame, frame = torch.split(frame, 3, dim=0)
+    # gt_frame, frame = torch.split(frame, 3, dim=0)
     image = TF.to_pil_image(frame)
 
     # 1-3: Quantized Image
@@ -77,7 +77,7 @@ def conditioning_transform(frame: torch.Tensor,*, encode_preprocess) -> torch.Te
     # Stack all channels into a 7-channel tensor
     stacked_tensor = torch.cat([quantized_tensor, quant_level_channel, grad_x_tensor, grad_y_tensor, texture_indicator], dim=0)
 
-    return torch.cat([gt_frame.half(), stacked_tensor.half()])
+    return torch.cat([frame.half(), stacked_tensor.half()])
 
 
 @ignore_category
