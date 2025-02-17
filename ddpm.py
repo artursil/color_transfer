@@ -17,14 +17,15 @@ class DDPMCB(Callback):
         images = self.xb[0]  # Shape: (batch_size, 3, H, W)
         gt_imgs = images[:, :3, ...]
         encoder_imgs = images[:, 3:, ...]
+        quantized_images = encoder_imgs[:, :3, ...]
         batch_size = images.shape[0]
 
         # Generate noise
         t = torch.randint(0, self.timesteps, (batch_size,), device=images.device).long()
-        noise = torch.randn_like(gt_imgs)
+        noise = torch.randn_like(quantized_images)
 
         # Apply noise
-        noisy_images = self.scheduler.add_noise(gt_imgs, noise, t)
+        noisy_images = self.scheduler.add_noise(quantized_images, noise, t)
 
         noisy_images = torch.cat(
             [noisy_images, noisy_images], dim=1
