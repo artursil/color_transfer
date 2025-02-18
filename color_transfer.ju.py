@@ -162,20 +162,37 @@ astats = ActivationStats(modules=layers_to_track)
 learn.add_cb(astats)
 
 # %%
-# learn.lr_find()
+learn.lr_find()
 # %%
-lr = 10e-05
+lr = 10e-04
 learn.fit_one_cycle(1, lr)
-learn.save("ctransfer_epoch_1.pth")
+# %%
+# learn.save("ctransfer_epoch_1.pth")
 # learn = learn.load("ctransfer_epoch_1.pth")
 # %%
         
 # %%
-learn2 = learn.add_cb(astats)
-learn2.save("ctransfer_epoch_2.pth")
+# learn2 = learn.add_cb(astats)
 # %%
 
 # %%
-astats.color_dim()
+# astats.color_dim()
 # %%
+lr = 10e-05
+learn.fit_one_cycle(1, lr)
+# learn.load("ctransfer_epoch_2.pth")
 # %%
+lr = 10e-04
+learn.save("ctransfer_epoch_2.pth")
+learn.fit_one_cycle(4, lr)
+learn.save("ctransfer_epoch_3_6.pth")
+# learn.save("ctransfer_epoch_4.pth")
+# learn.fit_one_cycle(1, lr)
+# learn.save("ctransfer_epoch_5.pth")
+# %%
+learn.fit_one_cycle(3, lr)
+learn.save("ctransfer_epoch_6_8.pth")
+# %%
+lr = 10e-06
+learn.fit_one_cycle(1, lr)
+learn.save("ctransfer_epoch_9.pth")
