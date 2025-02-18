@@ -26,16 +26,19 @@ class DDPMCB(Callback):
 
         # Apply noise
         noisy_images = self.scheduler.add_noise(quantized_images, noise, t)
+        noisy_gt_images = self.scheduler.add_noise(gt_imgs, noise, t)
 
         noisy_images = torch.cat(
             [noisy_images, noisy_images], dim=1
         )  # Shape: (batch_size, 6, H, W)
-        gt_image_true = torch.cat(
-            [gt_imgs, gt_imgs], dim=1
+        noisy_gt_images = torch.cat(
+            [noisy_gt_images, noisy_gt_images], dim=1
+        # gt_image_true = torch.cat(
+        #     [gt_imgs, gt_imgs], dim=1
         )  # Shape: (batch_size, 6, H, W)
 
         self.learn.xb = (noisy_images, encoder_imgs, t)
-        self.learn.yb = (gt_image_true,)
+        self.learn.yb = (noisy_gt_images,)
 
     def after_pred(self):
         """Compute loss: Train UNet to predict noise (MSE loss)."""
