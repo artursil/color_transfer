@@ -84,12 +84,11 @@ def conditioning_transform(frame: torch.Tensor,*, encode_preprocess) -> torch.Te
 def clip_preprocess(frame,*, stage_2):
     # frame for the noise input and gt
     clip_processor = stage_2.feature_extractor
-    gt_frame = torch.tensor(clip_processor(frame)["pixel_values"][0])
+    gt_img = frame[:3,...]
+    enc_img = frame[3:,...]
+    gt_img = torch.tensor(clip_processor(gt_img)["pixel_values"][0])
 
-    # frame for the encoder
-    frame = ToTensor()(frame)
-    frame = Resize((224,224))(frame.permute(1,2,0))
-    return torch.cat([gt_frame, frame], dim=0)  # Shape: (6, H, W)
+    return torch.cat([gt_img, enc_img], dim=0)  # Shape: (10, H, W)
 
 
     
